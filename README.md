@@ -4,7 +4,6 @@
 <div align="center">
   Versatile crossplatform OpenGL boilerplate written in Rust
 </div>
-Useful crossplatform boilerplate for OpenGL
 
 # Examples
 
