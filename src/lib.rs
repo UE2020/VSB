@@ -1,6 +1,5 @@
 use glow::*;
 use std::sync::Arc;
-use std::time::Instant;
 
 pub enum CornerType {
     Round,
@@ -105,7 +104,7 @@ impl Drop for Circle {
 }
 
 impl Circle {
-    pub unsafe fn new (gl: Arc<Context>, radius: f32) -> Self {
+    pub unsafe fn new (gl: Arc<Context>, radius: f32) -> Result<Self, lyon::tessellation::TessellationError> {
         use lyon::math::Point;
         use lyon::path::{builder::*, Winding};
         use lyon::tessellation::{FillTessellator, FillOptions, VertexBuffers};
@@ -127,7 +126,7 @@ impl Circle {
             Winding::Positive
         );
     
-        builder.build();
+        builder.build()?;
 
         let vertex_array = gl.create_vertex_array().unwrap();
         gl.bind_vertex_array(Some(vertex_array));
@@ -170,14 +169,14 @@ impl Circle {
             glow::DYNAMIC_DRAW,
         );
 
-        Self {
+        Ok(Self {
             vertex_array,
             vertex_buffer,
             index_buffer,
             indices: geometry.indices.len(),
             radius,
             gl
-        }
+        })
     }
 
     pub fn draw_with(&self, program: u32, position: cgmath::Vector2<f32>, color: ColorUniforms, resolution: (u32, u32)) {
@@ -393,7 +392,7 @@ impl Rectangle {
         self.height = height;
     }
 
-    fn draw_with(&self, program: u32, position: cgmath::Vector2<f32>, color: ColorUniforms, resolution: (u32, u32)) {
+    pub fn draw_with(&self, program: u32, position: cgmath::Vector2<f32>, color: ColorUniforms, resolution: (u32, u32)) {
         let mut uniforms: Vec<Box<dyn Uniforms>> = Vec::new();
         uniforms.push(Box::new(ProjectionUniforms::new(resolution)));
         uniforms.push(Box::new({
@@ -441,7 +440,7 @@ impl Drop for RadialGradient {
 }
 
 impl RadialGradient {
-    pub unsafe fn new (gl: Arc<Context>, radius: f32) -> Self {
+    pub unsafe fn new (gl: Arc<Context>, radius: f32) -> Result<Self, lyon::tessellation::TessellationError> {
         use lyon::math::Point;
         use lyon::path::{builder::*, Winding};
         use lyon::tessellation::{FillTessellator, FillOptions, VertexBuffers};
@@ -463,7 +462,7 @@ impl RadialGradient {
             Winding::Positive
         );
     
-        builder.build();
+        builder.build()?;
 
         let vertex_array = gl.create_vertex_array().unwrap();
         gl.bind_vertex_array(Some(vertex_array));
@@ -506,14 +505,14 @@ impl RadialGradient {
             glow::DYNAMIC_DRAW,
         );
 
-        Self {
+        Ok(Self {
             vertex_array,
             vertex_buffer,
             index_buffer,
             indices: geometry.indices.len(),
             radius,
             gl
-        }
+        })
     }
 
     pub fn draw_with(&self, program: u32, position: cgmath::Vector2<f32>, color: ColorUniforms, resolution: (u32, u32)) {
